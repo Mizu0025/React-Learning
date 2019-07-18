@@ -30,12 +30,32 @@ class CoursesPage extends React.Component {
     }
   }
 
-  handleDeleteCourse = course => {
-    var toastTest = (this.toastId = toast.success("Course deleting..."));
-    this.props.actions.deleteCourse(course).catch(error => {
-      toast.dismiss(toastTest);
-      toast.error("Delete failed. " + error.message, { autoClose: false });
-    });
+  handleDeleteCourse = async course => {
+    const toastUpdate = (toastId, message, updateType, autoclose) => {
+      toast.update(toastId, {
+        render: message,
+        type: updateType,
+        autoClose: autoclose
+      });
+    };
+
+    try {
+      var toastDeleteNotify = (this.toastId = toast("Course deleting..."));
+      await this.props.actions.deleteCourse(course);
+      toastUpdate(
+        toastDeleteNotify,
+        "Course deleted!",
+        toast.TYPE.SUCCESS,
+        true
+      );
+    } catch (error) {
+      toastUpdate(
+        toastDeleteNotify,
+        "Delete failed: " + error.message,
+        toast.TYPE.ERROR,
+        false
+      );
+    }
   };
 
   render() {
@@ -54,7 +74,6 @@ class CoursesPage extends React.Component {
             >
               Add Course
             </button>
-
             <CourseList
               onDeleteClick={this.handleDeleteCourse}
               courses={this.props.courses}
